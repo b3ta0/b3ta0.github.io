@@ -22,7 +22,57 @@
     <title>test.md</title>
     <url>/2020/08/03/test/</url>
     <content><![CDATA[<h1 id="test1"><a href="#test1" class="headerlink" title="test1"></a>test1</h1><p>heheheh <a id="more"></a> hahaha</p>
-<h2 id="test2"><a href="#test2" class="headerlink" title="test2"></a>test2</h2>]]></content>
+<h2 id="test2"><a href="#test2" class="headerlink" title="test2"></a>test2</h2><blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>世间所有的相遇，都是久别重逢</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<div class="note default">
+            <p>default 提示块标签</p>
+          </div>
+
+<div class="note primary">
+            <p>primary 提示块标签</p>
+          </div>
+
+<div class="note success">
+            <p>success 提示块标签</p>
+          </div>
+
+<div class="note info">
+            <p>info 提示块标签</p>
+          </div>
+
+<div class="note warning">
+            <p>warning 提示块标签</p>
+          </div>
+
+<div class="note danger">
+            <p>danger 提示块标签</p>
+          </div>
+
+<span class="label default">默认</span> <span class="label primary">主要</span> <span class="label success">成功</span> <span class="label info">信息</span> <span class="label warning">警告</span> <span class="label danger">危险</span> 
+<span class="label success">这是成功的信息</span>
+
+<div class="tabs" id="tab"><ul class="nav-tabs"><li class="tab active"><a href="#tab-1">tab 1</a></li><li class="tab"><a href="#tab-2">tab 2</a></li><li class="tab"><a href="#tab-3">A</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-1"><p><strong>选项卡 1</strong> </p></div><div class="tab-pane" id="tab-2"><p><strong>选项卡 2</strong></p></div><div class="tab-pane" id="tab-3"><p><strong>选项卡 3</strong> 名字为A</p></div></div></div>
+
+<a class="btn" href="url" title="[title]">
+            <i class="fa fa-icon [class]"></i>text
+          </a>
+
+<div><a class="btn" href="https://tding.top/ " title="这是小丁的个人博客首页">
+            <i class="fa fa-home fa-fw"></i>首页
+          </a></div>
+
+<div class="text-center"><div><a class="btn" href="https://tding.top/ " title="这是小丁的个人博客首页">
+            <i class="fa fa-home fa-fw"></i>首页
+          </a> <a class="btn" href="https://tding.top/movies/ " title="豆瓣电影">
+            <i class="fa fa-film fa-fw"></i>观影
+          </a> <a class="btn" href="https://tding.top/books/ " title="豆瓣读书">
+            <i class="fa fa-book fa-fw"></i>阅读
+          </a></div></div>]]></content>
       <categories>
         <category>test</category>
       </categories>
