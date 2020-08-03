@@ -177,7 +177,7 @@ body {
 body {
   background: var(--body-bg-color);
   color: var(--text-color);
-  font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 1em;
   line-height: 2;
 }
@@ -193,7 +193,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Roboto Slab', 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: bold;
   line-height: 1.5;
   margin: 20px 0 15px;
@@ -436,7 +436,7 @@ pre {
 }
 pre,
 code {
-  font-family: consolas, Menlo, monospace, "PingFang SC", "Microsoft YaHei";
+  font-family: 'PT Mono', consolas, Menlo, 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif, monospace;
 }
 code {
   background: #eee;
@@ -1030,7 +1030,7 @@ pre .javascript .function {
   color: var(--brand-hover-color);
 }
 .site-title {
-  font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 1.375em;
   font-weight: normal;
   margin: 0;
@@ -1219,7 +1219,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #387ee3;
+  background: #825516;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1366,10 +1366,9 @@ pre .javascript .function {
   line-height: 1.8;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .post-toc .nav .nav-child {
-  display: none;
+  display: block;
 }
 .post-toc .nav .active > .nav-child {
   display: block;
@@ -1556,7 +1555,7 @@ pre .javascript .function {
   top: 0;
 }
 .post-body {
-  font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
@@ -1854,7 +1853,7 @@ pre .javascript .function {
 }
 .posts-expand .post-meta {
   color: #999;
-  font-family: 'Noto Serif SC', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 0.75em;
   margin: 3px 0 60px 0;
   text-align: center;
@@ -2721,6 +2720,173 @@ ul.breadcrumb li + li:last-child {
     margin: 8px 0 0;
   }
 }
+.category-list-link:hover {
+  transform: scale(1.1);
+  box-shadow: 10px 10px 15px 2px rgba(0,0,0,0.12), 0 0 6px 0 rgba(104,104,105,0.1);
+  border-radius: 15px;
+  padding: 6px 16px;
+  margin-left: 0px;
+  font-size: 16px;
+  transition-duration: 0.15s;
+}
+a.category-list-link:before {
+  top: 10px;
+  width: 18px;
+  height: 18px;
+  content: "📚";
+  margin-right: 5px;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: 15px;
+  line-height: 18px;
+}
+.page-archive .archive-page-counter {
+  font-size: 18px;
+  background-color: #49b1f5;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 8px;
+  color: #fff;
+}
+@media (max-width: 767px) {
+  .page-archive .archive-page-counter {
+    font-size: 16px;
+  }
+}
+.my-post-time {
+  font-size: 11px;
+  position: absolute;
+  color: #fff;
+  background-color: #49b1f5;
+  border-radius: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-left: 15px;
+}
+.mypost {
+  position: relative;
+  margin-bottom: 1rem;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -ms-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+a.my-post-title-link:before {
+  top: 10px;
+  width: 18px;
+  height: 18px;
+  content: "📚";
+  margin-right: 5px;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: 15px;
+  line-height: 18px;
+}
+.my-post:hover {
+  transform: scale(1.1);
+  box-shadow: 10px 10px 15px 2px rgba(0,0,0,0.12), 0 0 6px 0 rgba(104,104,105,0.1);
+  border-radius: 30px;
+  width: 400px;
+  padding: 1px 10px;
+  margin-left: 25px;
+  font-size: 16px;
+  transition-duration: 0.15s;
+}
+@media (max-width: 767px) {
+  .my-post:hover {
+    width: 260px;
+    margin-left: 18px;
+  }
+}
+a.my-post-title-link {
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 400;
+}
+@media (max-width: 767px) {
+  a.my-post-title-link {
+    font-size: 14px;
+  }
+}
+.my-post-title {
+  display: block;
+  margin-left: 4.5rem;
+  color: #4c4948;
+  text-decoration: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.my-post-header {
+  position: top;
+  margin-bottom: 1rem;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -ms-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+.my-post-meta {
+  position: absolute;
+  color: #99a9bf;
+  width: 80px;
+  color: #114142;
+}
+div.post-block.tag .collection-title h2 {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #3f3f3f;
+  border-radius: 20px;
+  font-size: 22px;
+  background-color: #b4e8fa;
+  padding: 2px 15px;
+  letter-spacing: 1.5px;
+  box-sizing: border-box;
+  color: #3f3f3f;
+  display: inline-block;
+  margin: 10px 0 10px;
+  text-align: center;
+}
+@media (max-width: 767px) {
+  div.post-block.tag .collection-title h2 {
+    font-size: 18px;
+  }
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-button {
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-button:start:increment,
+::-webkit-scrollbar-button:end:decrement {
+  display: none;
+}
+::-webkit-scrollbar-corner {
+  display: block;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  border-radius: 8px;
+  background-color: rgba(0,0,0,0.5);
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb {
+  border-right: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+::-webkit-scrollbar-track:hover {
+  background-color: rgba(0,0,0,0.15);
+}
+::-webkit-scrollbar-button:start {
+  width: 10px;
+  height: 10px;
+/*background: url(../images/scrollbar_arrow.png) no-repeat 0 0;*/
+/*可以添加滚动条样式*/
+}
 body {
   background: url("https://s1.ax1x.com/2020/08/03/aN3Dl6.jpg");
   background-repeat: no-repeat;
@@ -2739,4 +2905,11 @@ body {
 }
 .popup {
   opacity: 0.9;
+}
+/*鼠标样式*/
+* {
+  cursor: url("/images/default.cur"), auto;
+}
+:link {
+  cursor: url("/images/pointer.cur"), auto;
 }
