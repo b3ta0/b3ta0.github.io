@@ -1219,7 +1219,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #b6c28e;
+  background: #1f1d7e;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2886,30 +2886,4 @@ div.post-block.tag .collection-title h2 {
   height: 10px;
 /*background: url(../images/scrollbar_arrow.png) no-repeat 0 0;*/
 /*可以添加滚动条样式*/
-}
-body {
-  background: url("https://s1.ax1x.com/2020/08/03/aN3Dl6.jpg");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: 50% 50%;
-}
-.content-wrap {
-  opacity: 0.9;
-}
-.sidebar {
-  opacity: 0.9;
-}
-.header-inner {
-  background: rgba(255,255,255,0.9);
-}
-.popup {
-  opacity: 0.9;
-}
-/*鼠标样式*/
-* {
-  cursor: url("/images/default.cur"), auto;
-}
-:link {
-  cursor: url("/images/pointer.cur"), auto;
 }
