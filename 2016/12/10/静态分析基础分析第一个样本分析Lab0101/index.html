@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/1.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/1.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/1.png">
+  <link rel="mask-icon" href="/images/1.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.b3ta0.one","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述：因为想学习病毒分析，所以最近在看《恶意代码分析实战》，这个样本来源于第一章的实验（其实我也不知道我分析的对不对）。通过几个静态分析工具用静态分析基本技术，了解它的基础信息。但是因为我太菜，也没有接触过病毒样本，0基础什么都不知道，所以分析的比较浅显。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="静态分析基础技术の第一个样本分析（Lab01-01）">
+<meta property="og:url" content="https://www.b3ta0.one/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/index.html">
+<meta property="og:site_name" content="大果子のBlog">
+<meta property="og:description" content="概述：因为想学习病毒分析，所以最近在看《恶意代码分析实战》，这个样本来源于第一章的实验（其实我也不知道我分析的对不对）。通过几个静态分析工具用静态分析基本技术，了解它的基础信息。但是因为我太菜，也没有接触过病毒样本，0基础什么都不知道，所以分析的比较浅显。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600c203587b.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/586008057966c.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600850ad4b5.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/5860087e11723.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/586008ac6424c.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/586008ef94139.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600903107c6.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600946a6f4e.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600983547b8.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/5860099754c8b.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/586009a70570a.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/586009b648488.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600a4c45375.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600c4bb945d.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600a8441c25.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600a9237fb2.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600aa25e29f.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600ab14b0e1.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600abedc207.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600b0f791b2.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600b1bed68f.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2016/12/25/58600b2ac5999.png">
+<meta property="article:published_time" content="2016-12-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2017-05-17T13:33:20.000Z">
+<meta property="article:author" content="大果砸">
+<meta property="article:tag" content="病毒分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ooo.0o0.ooo/2016/12/25/58600c203587b.png">
+
+<link rel="canonical" href="https://www.b3ta0.one/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>静态分析基础技术の第一个样本分析（Lab01-01） | 大果子のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">大果子のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴</a>
+
+  </li>
+        <li class="menu-item menu-item-shuoshuo">
+
+    <a href="/shuoshuo/" rel="section"><i class="fa fa-tags fa-fw"></i>碎碎念</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.b3ta0.one/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://s1.ax1x.com/2020/08/02/aJrF1J.jpg">
+      <meta itemprop="name" content="大果砸">
+      <meta itemprop="description" content="good good study, day day up!">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大果子のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          静态分析基础技术の第一个样本分析（Lab01-01）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-12-10 00:00:00" itemprop="dateCreated datePublished" datetime="2016-12-10T00:00:00+08:00">2016-12-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2017-05-17 21:33:20" itemprop="dateModified" datetime="2017-05-17T21:33:20+08:00">2017-05-17</time>
+              </span>
+
+          
+            <span id="/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/" class="post-meta-item leancloud_visitors" data-flag-title="静态分析基础技术の第一个样本分析（Lab01-01）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h4><p>因为想学习病毒分析，所以最近在看《恶意代码分析实战》，这个样本来源于第一章的实验（其实我也不知道我分析的对不对）。通过几个静态分析工具用静态分析基本技术，了解它的基础信息。但是因为我太菜，也没有接触过病毒样本，0基础什么都不知道，所以分析的比较浅显。</p>
+<a id="more"></a>
+<h4 id="基本信息："><a href="#基本信息：" class="headerlink" title="基本信息："></a>基本信息：</h4><p>文件名称：Lab01-01.exe<br>时间戳：2010-12-19 16:16:19<br>MD5：bb7425b82141a1c0f7d60e5106676bb1<br>SHA1：9dce39ac1bd36d877fdb0025ee88fdaff0627cdb</p>
+<h4 id="基本信息：-1"><a href="#基本信息：-1" class="headerlink" title="基本信息："></a>基本信息：</h4><p>文件名称：Lab01-01.dll<br>时间戳：2010-12-19 16:16:38<br>MD5： 290934c61de9176ad682ffdd65f0a669<br>SHA1：a4b35de71ca20fe776dc72d12fb2886736f43c22</p>
+<h4 id="分析工具："><a href="#分析工具：" class="headerlink" title="分析工具："></a>分析工具：</h4><p>WinMD5，Strings，PEid，PEview，dependencywalker，resource hacker</p>
+<h4 id="开始分析："><a href="#开始分析：" class="headerlink" title="开始分析："></a>开始分析：</h4><p>因为.dll文件要通过可执行文件的调用来实现相应的功能，所以我先分析Lab01-01.dll</p>
+<p>首先用360查杀一下，显示没有发现威胁</p>
+<p>然后我们把它上传到 <a target="_blank" rel="noopener" href="https://www.virustotal.com/">https://www.virustotal.com/</a> 中检测分析<br><img src="https://ooo.0o0.ooo/2016/12/25/58600c203587b.png" alt="a"><br>结果：69%的人觉得这是恶意代码，而且我们可以从附加信息中得到它的一些基本信息。</p>
+<h5 id="工具：WinMD5（也能通过windows下的工具获得MD5）"><a href="#工具：WinMD5（也能通过windows下的工具获得MD5）" class="headerlink" title="工具：WinMD5（也能通过windows下的工具获得MD5）"></a>工具：WinMD5（也能通过windows下的工具获得MD5）</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/586008057966c.png" alt="1"><br>结果：这样我们就可以知道Lab01-01.dll的MD5（由于哈希是唯一标识，所以可以在网上去搜索这段哈希找找这个恶意代码的相关信息，可能有大神已经分析过）</p>
+<h5 id="工具：Strings"><a href="#工具：Strings" class="headerlink" title="工具：Strings"></a>工具：Strings</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600850ad4b5.png" alt="2"><br>结果：排除一些显而易见不重要的字符串，可以看到这些关键的信息。例如：Sleep，CreateProcessA,KERNEL32.dll，WS_32.dll，127.26.152.13等等。我猜测KERNEL32.dll，WS_32.dll是其中包含的重要dll，其他的是可能使用到的重要函数。通过可以看见的几个函数，猜测可能有操作进程，使系统休眠等行为，那一串IP地址可能是通过联网与该地址进行一些通信。</p>
+<h5 id="工具：PEid"><a href="#工具：PEid" class="headerlink" title="工具：PEid"></a>工具：PEid</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/5860087e11723.png" alt="3"><br>结果：显示的是VC6.0. 一般这样的结果应该是没有壳的，表示是由VC6.0编译的。而且在上一部查找字符串中可以清晰的看到一串关键信息，如果有壳的话是不会看到这些信息的。所以在这里我当作没有壳，不用脱壳来处理。</p>
+<h5 id="工具：PEview"><a href="#工具：PEview" class="headerlink" title="工具：PEview"></a>工具：PEview</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/586008ac6424c.png" alt="4"><br>我们再看一次.text节的信息，这里可以看到.text的虚拟大小比在磁盘上的大小要小，所以一般情况下也代表着没有加壳<br><img src="https://ooo.0o0.ooo/2016/12/25/586008ef94139.png" alt="5"><br>在.rdata节中包含的除了全局的只读数据之外，还包含导入导出的函数信息，这里看到的和我们在strings中查找的字符串中的函数和dll很相似，所以离我们的猜测更近了一步。<br><img src="https://ooo.0o0.ooo/2016/12/25/58600903107c6.png" alt="6"><br>在.data节中包含的是全局数据，这里看到了exec，sleep，hello和那串IP地址，可见这四个数据是需要重点关注的。更加肯定了之前的猜测，可能有使系统休眠的行为，那一串IP地址可能是通过联网与该地址进行一些通信，hello可能是作为字符串发往目标地址。</p>
+<h5 id="工具：dependencywalker"><a href="#工具：dependencywalker" class="headerlink" title="工具：dependencywalker"></a>工具：dependencywalker</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600946a6f4e.png" alt="7"><br><img src="https://ooo.0o0.ooo/2016/12/25/58600983547b8.png" alt="8"><br><img src="https://ooo.0o0.ooo/2016/12/25/5860099754c8b.png" alt="9"><br><img src="https://ooo.0o0.ooo/2016/12/25/586009a70570a.png" alt="10"><br><img src="https://ooo.0o0.ooo/2016/12/25/586009b648488.png" alt="11"><br>结果：我们可以看到Lab01-01.dll的dll列表包含了三个dll，我们在KERNEL32.dll中找到了一部分导入的函数，在WS_32.dll中导入函数用的是导入序号的方式，其中有大部分运用了用于网络连接的socket这类函数，可以推测出有连接网络的迹象。在下面的所有函数列表中找到相应的函数就行，因为我是第一次完整的分析一个样本，什么都不懂，所以我把上面所导入的函数和相应的功能到列在下面，以便推测实现的功能：（虽然已经可以大致猜测出来了）</p>
+<p>KERNEL32.dll CloseHandle：包括文件、文件映射、进程、线程、安全和同步对象等<br>KERNEL32.dll CreateMutex：找出当前系统是否已经存在指定进程的实例。如果没有则创建一个互斥体。<br>KERNEL32.dll  CreateProcess ：用来创建一个新的进程和它的主线程，这个新进程运行指定的可执行文件<br>KERNEL32.dll OpenMutex：现有的一个已命名互斥体对象创建一个新句柄<br>KERNEL32.dll  sleep ：将调用它的进程挂起一段时间后继续运行，挂起时不仅不会回应用户操作，还会停止自身的运行<br>WS_32.dll closesocket：关闭套接字<br>WS_32.dll connect：建立套接字网络连接<br>WS_32.dll htons：将一个16位数由主机字节顺序转换为网络字节顺序<br>WS_32.dll inet_addr：将一个点分十进制的IP转换成一个长整数型数（u_long类型）<br>WS_32.dll recv：接收数据包<br>WS_32.dll send：发送数据包<br>WS_32.dll shutdown：关闭套接字<br>WS_32.dll socket：创建套接字<br>WS_32.dll WSAStartup：即WSA(Windows Sockets Asynchronous，Windows异步套接字)的启动命令<br>WS_32.dll WSACleanup：终止Winsock 2 DLL (Ws2_32.dll) 的使用</p>
+<p>在看到send函数后，更加肯定了之前的猜测，会发送“hello”给目标地址并且接受数据包。</p>
+<h5 id="工具：resource-hacker"><a href="#工具：resource-hacker" class="headerlink" title="工具：resource hacker"></a>工具：resource hacker</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600a4c45375.png" alt="13"><br>哦豁，是空的。</p>
+<h4 id="接下来是对Lab01-01-exe的分析："><a href="#接下来是对Lab01-01-exe的分析：" class="headerlink" title="接下来是对Lab01-01.exe的分析："></a>接下来是对Lab01-01.exe的分析：</h4><p>首先用360查杀一下，显示发现高危风险项</p>
+<p>然后我们把它上传到 <a target="_blank" rel="noopener" href="https://www.virustotal.com/">https://www.virustotal.com/</a> 中检测分析：<br><img src="https://ooo.0o0.ooo/2016/12/25/58600c4bb945d.png" alt="b"><br>结果：只有50%的人觉得这是恶意代码，而且我们可以从附加信息中得到它的一些基本信息。</p>
+<h5 id="工具：Strings-1"><a href="#工具：Strings-1" class="headerlink" title="工具：Strings"></a>工具：Strings</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600a8441c25.png" alt="14"><br>结果：排除一些显而易见不重要的字符串，可以看到这些关键的信息。我猜测Lab01-01.exe是通过调用KERNEL32.dll和Lab01-01.dll来实现功能的。但是这里有个KERNEL132.dll有些奇怪，和KERNEL32.dll很像，难道是用来混淆的？？太菜了，还不懂。</p>
+<h5 id="工具：PEid-1"><a href="#工具：PEid-1" class="headerlink" title="工具：PEid"></a>工具：PEid</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600a9237fb2.png" alt="15"><br>结果：同样的显示的是VC6.0.所以在这里我当作没有壳，不用脱壳来处理。</p>
+<h5 id="工具：PWview"><a href="#工具：PWview" class="headerlink" title="工具：PWview"></a>工具：PWview</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600aa25e29f.png" alt="16"><br>我们再看一次.text节的信息，这里可以看到.text的虚拟大小与在磁盘上的大小差不多，所以一般情况下也代表着没有加壳<br><img src="https://ooo.0o0.ooo/2016/12/25/58600ab14b0e1.png" alt="17"><br>在.rdata节中和我们在strings中查找的字符串中的函数和dll很相似，所以离我们的猜测更近了一步。<br><img src="https://ooo.0o0.ooo/2016/12/25/58600abedc207.png" alt="18"><br>在.data节中又看到了这个奇怪的KERNEL132.dll，它作为全局变量很值得关注，但是用来做什么呢，我也有些迷惑。</p>
+<h5 id="工具：dependencywalker-1"><a href="#工具：dependencywalker-1" class="headerlink" title="工具：dependencywalker"></a>工具：dependencywalker</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600b0f791b2.png" alt="19"><br><img src="https://ooo.0o0.ooo/2016/12/25/58600b1bed68f.png" alt="20"></p>
+<p>结果：我们可以看一部分导入的函数，我也把上面所导入的函数和相应的功能到列在下面，以便推测实现的功能：<br>KERNEL32.dll CopyFile：拷贝文件<br>KERNEL32.dll CreateFile：这是一个多功能的函数，可打开或创建以下对象，并返回可访问的句柄：控制台，通信资源，目录（只读打开），磁盘驱动器，文件，邮槽，管道。<br>KERNEL32.dll CreateFileMapping：创建一个新的文件映射内核对象<br>KERNEL32.dll FindClose: 关闭由FindFirstFile函数创建的一个搜索句柄<br>KERNEL32.dll FindFirstFile：根据文件名查找文件<br>KERNEL32.dll FindNextFile：用来遍历目录或文件时，判断当前目录下是否有下一个目录或文件<br>KERNEL32.dll IsBadReadPtr：该函数检查调用进程是否有读取指定内存的内容的权限<br>KERNEL32.dll MapViewOfView：为文件的数据保留一个地址空间区域，并将文件的数据作为映射到这个区域的物理存储器进行提交<br>KERNEL32.dll UnmapViewOfFile：不再需要把文件的数据映射到进程的地址空间中时，可以该函数来释放内存区域。<br>MSVCRT.dll XcptFilter：标识要执行的异常和相关事件<br>MSVCRT.dll getmainargs：调用分析的命令行并复制参数传递给 main() 返回传递的指针<br>MSVCRT.dll _p___initenv：初始化环境变量<br>MSVCRT.dll _p__commode：定默认文件提交模式。函数仅供内部使用，用户代码不应调用它<br>MSVCRT.dll _p__fmode：_p__fmode 函数仅供内部使用，用户代码不应调用它。<br>MSVCRT.dll _set_app_type：找不到具体函数功能，猜测是设置应用程序类型。<br>MSVCRT.dll _setusermatherr：指定用户提供的事务来处理算术错误，而不是_matherr事务。<br>MSVCRT.dll adjust_fdiv：找不到具体函数功能，猜测为链接时自动调用的特定模式的文件。_open_pipe 和 I/O 操作指定 binary 或 text 转换<br>MSVCRT.dll controlfp：获取和设置浮点控制字<br>MSVCRT.dll except_handler3：异常处理函数<br>MSVCRT.dll _exit/exit：终止函数。它们之间的区别是_exit函数直接将程序关闭，缓冲区中的数据就会丢失，反之，如果向保证数据的完整性，就一定要使用exit函数。<br>MSVCRT.dll initterm：内部方法指浏览函数指针表并初始化它们<br>MSVCRT.dll stricmp：比较字符串s1和s2，但不区分字母的大小写<br>MSVCRT.dll malloc：向系统申请分配指定size个字节的内存空间</p>
+<p>看到FindNextFile函数，我猜测前面那个奇怪的KERNEL132.dll是作为指定的文件名，在系统目录中要遍历查找这个文件。</p>
+<h5 id="工具：resource-hacker-1"><a href="#工具：resource-hacker-1" class="headerlink" title="工具：resource hacker"></a>工具：resource hacker</h5><p><img src="https://ooo.0o0.ooo/2016/12/25/58600b2ac5999.png" alt="21"><br>哦豁，还是空的。</p>
+<h5 id="Lab01-01-exe和Lab01-01-dll分析结束了，我最后得出的结论是：这个文件是用VC6-0编译出来的，没有加壳。它的主要功能是通过调用KERNEL32-dll和Lab01-01-dll来实现。一方面在目录中遍历寻找Kerne132-dll文件，如果不存在就创建新Kerne132-dll文件；一方面是连接网络，发送字符串“hello”给IP为127-26-52-13的目标地址通信，并接受来自目标地址的数据包，并且能使系统休眠。"><a href="#Lab01-01-exe和Lab01-01-dll分析结束了，我最后得出的结论是：这个文件是用VC6-0编译出来的，没有加壳。它的主要功能是通过调用KERNEL32-dll和Lab01-01-dll来实现。一方面在目录中遍历寻找Kerne132-dll文件，如果不存在就创建新Kerne132-dll文件；一方面是连接网络，发送字符串“hello”给IP为127-26-52-13的目标地址通信，并接受来自目标地址的数据包，并且能使系统休眠。" class="headerlink" title="Lab01-01.exe和Lab01-01.dll分析结束了，我最后得出的结论是：这个文件是用VC6.0编译出来的，没有加壳。它的主要功能是通过调用KERNEL32.dll和Lab01-01.dll来实现。一方面在目录中遍历寻找Kerne132.dll文件，如果不存在就创建新Kerne132.dll文件；一方面是连接网络，发送字符串“hello”给IP为127.26.52.13的目标地址通信，并接受来自目标地址的数据包，并且能使系统休眠。"></a>Lab01-01.exe和Lab01-01.dll分析结束了，我最后得出的结论是：<u>这个文件是用VC6.0编译出来的，没有加壳。它的主要功能是通过调用KERNEL32.dll和Lab01-01.dll来实现。一方面在目录中遍历寻找Kerne132.dll文件，如果不存在就创建新Kerne132.dll文件；一方面是连接网络，发送字符串“hello”给IP为127.26.52.13的目标地址通信，并接受来自目标地址的数据包，并且能使系统休眠。</u></h5><p>第一次自己分析出来一个样本，虽然很简单，但是敲级开心~~啦啦啦</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>大果砸
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.b3ta0.one/2016/12/10/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90Lab0101/" title="静态分析基础技术の第一个样本分析（Lab01-01）">https://www.b3ta0.one/2016/12/10/静态分析基础分析第一个样本分析Lab0101/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 病毒分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/12/04/%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%80%9D%E6%83%B3%E5%9C%A8C%E8%AF%AD%E8%A8%80%E4%B8%AD/" rel="prev" title="简单的二进制思想在C语言中">
+      <i class="fa fa-chevron-left"></i> 简单的二进制思想在C语言中
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/12/18/%E9%9D%99%E6%80%81%E5%9F%BA%E7%A1%80%E5%88%86%E6%9E%90Lab0102/" rel="next" title="静态基础分析Lab01-02">
+      静态基础分析Lab01-02 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%EF%BC%9A"><span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%EF%BC%9A"><span class="nav-text">基本信息：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%EF%BC%9A-1"><span class="nav-text">基本信息：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7%EF%BC%9A"><span class="nav-text">分析工具：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90%EF%BC%9A"><span class="nav-text">开始分析：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9AWinMD5%EF%BC%88%E4%B9%9F%E8%83%BD%E9%80%9A%E8%BF%87windows%E4%B8%8B%E7%9A%84%E5%B7%A5%E5%85%B7%E8%8E%B7%E5%BE%97MD5%EF%BC%89"><span class="nav-text">工具：WinMD5（也能通过windows下的工具获得MD5）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9AStrings"><span class="nav-text">工具：Strings</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9APEid"><span class="nav-text">工具：PEid</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9APEview"><span class="nav-text">工具：PEview</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9Adependencywalker"><span class="nav-text">工具：dependencywalker</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9Aresource-hacker"><span class="nav-text">工具：resource hacker</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5%E6%98%AF%E5%AF%B9Lab01-01-exe%E7%9A%84%E5%88%86%E6%9E%90%EF%BC%9A"><span class="nav-text">接下来是对Lab01-01.exe的分析：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9AStrings-1"><span class="nav-text">工具：Strings</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9APEid-1"><span class="nav-text">工具：PEid</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9APWview"><span class="nav-text">工具：PWview</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9Adependencywalker-1"><span class="nav-text">工具：dependencywalker</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9Aresource-hacker-1"><span class="nav-text">工具：resource hacker</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Lab01-01-exe%E5%92%8CLab01-01-dll%E5%88%86%E6%9E%90%E7%BB%93%E6%9D%9F%E4%BA%86%EF%BC%8C%E6%88%91%E6%9C%80%E5%90%8E%E5%BE%97%E5%87%BA%E7%9A%84%E7%BB%93%E8%AE%BA%E6%98%AF%EF%BC%9A%E8%BF%99%E4%B8%AA%E6%96%87%E4%BB%B6%E6%98%AF%E7%94%A8VC6-0%E7%BC%96%E8%AF%91%E5%87%BA%E6%9D%A5%E7%9A%84%EF%BC%8C%E6%B2%A1%E6%9C%89%E5%8A%A0%E5%A3%B3%E3%80%82%E5%AE%83%E7%9A%84%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E6%98%AF%E9%80%9A%E8%BF%87%E8%B0%83%E7%94%A8KERNEL32-dll%E5%92%8CLab01-01-dll%E6%9D%A5%E5%AE%9E%E7%8E%B0%E3%80%82%E4%B8%80%E6%96%B9%E9%9D%A2%E5%9C%A8%E7%9B%AE%E5%BD%95%E4%B8%AD%E9%81%8D%E5%8E%86%E5%AF%BB%E6%89%BEKerne132-dll%E6%96%87%E4%BB%B6%EF%BC%8C%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%AD%98%E5%9C%A8%E5%B0%B1%E5%88%9B%E5%BB%BA%E6%96%B0Kerne132-dll%E6%96%87%E4%BB%B6%EF%BC%9B%E4%B8%80%E6%96%B9%E9%9D%A2%E6%98%AF%E8%BF%9E%E6%8E%A5%E7%BD%91%E7%BB%9C%EF%BC%8C%E5%8F%91%E9%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2%E2%80%9Chello%E2%80%9D%E7%BB%99IP%E4%B8%BA127-26-52-13%E7%9A%84%E7%9B%AE%E6%A0%87%E5%9C%B0%E5%9D%80%E9%80%9A%E4%BF%A1%EF%BC%8C%E5%B9%B6%E6%8E%A5%E5%8F%97%E6%9D%A5%E8%87%AA%E7%9B%AE%E6%A0%87%E5%9C%B0%E5%9D%80%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8C%85%EF%BC%8C%E5%B9%B6%E4%B8%94%E8%83%BD%E4%BD%BF%E7%B3%BB%E7%BB%9F%E4%BC%91%E7%9C%A0%E3%80%82"><span class="nav-text">Lab01-01.exe和Lab01-01.dll分析结束了，我最后得出的结论是：这个文件是用VC6.0编译出来的，没有加壳。它的主要功能是通过调用KERNEL32.dll和Lab01-01.dll来实现。一方面在目录中遍历寻找Kerne132.dll文件，如果不存在就创建新Kerne132.dll文件；一方面是连接网络，发送字符串“hello”给IP为127.26.52.13的目标地址通信，并接受来自目标地址的数据包，并且能使系统休眠。</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="大果砸"
+      src="https://s1.ax1x.com/2020/08/02/aJrF1J.jpg">
+  <p class="site-author-name" itemprop="name">大果砸</p>
+  <div class="site-description" itemprop="description">good good study, day day up!</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <div id="myCanvasContainer" class="widget tagcloud">
+          <canvas width="220" height="250" id="resCanvas" style="width=100%">
+              <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Crack/" rel="tag">Crack</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PE/" rel="tag">PE</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reverse/" rel="tag">Reverse</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unpack/" rel="tag">Unpack</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/test1/" rel="tag">test1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/test2/" rel="tag">test2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8A%A0%E5%AF%86%E4%B8%8E%E8%A7%A3%E5%AF%86/" rel="tag">加密与解密</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag">学习笔记</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/" rel="tag">病毒分析</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" rel="tag">网络编程</a><span class="tag-list-count">6</span></li></ul>
+          </canvas>
+          </div>
+      </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大果砸</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">56k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">51 分钟</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("08/02/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'MzgoDNlCc8loKv7VGrCIp7gx-gzGzoHsz',
+      appKey     : 'DLeJzJspHBmu7Me8RrebMDBK',
+      placeholder: "ヾﾉ≧∀≦)o来啊，快活啊!",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+
+
+  <script src="/js/activate-power-mode.min.js"></script>
+  <script>
+    POWERMODE.colorful = true;
+    POWERMODE.shake = false;
+    document.body.addEventListener('input', POWERMODE);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/1.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/1.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/1.png">
+  <link rel="mask-icon" href="/images/1.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.b3ta0.one","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="好兴奋，这次涉及了简单的加密过程。第一个涉及加密的小程序abex’crackme#2我来也~">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分析abex&#39;crackme#2">
+<meta property="og:url" content="https://www.b3ta0.one/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/index.html">
+<meta property="og:site_name" content="大果子のBlog">
+<meta property="og:description" content="好兴奋，这次涉及了简单的加密过程。第一个涉及加密的小程序abex’crackme#2我来也~">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/14/587a2d510e7b0.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/14/587a35fdbb721.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/14/587a387d56a14.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/14/587a41c31250d.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/15/587a4e6e59740.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/15/587a55af246b8.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/15/587a55f6d11ed.png">
+<meta property="og:image" content="https://ooo.0o0.ooo/2017/01/15/587a5647c3c32.png">
+<meta property="article:published_time" content="2017-01-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2017-05-17T13:37:12.000Z">
+<meta property="article:author" content="大果砸">
+<meta property="article:tag" content="Crack">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="Reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ooo.0o0.ooo/2017/01/14/587a2d510e7b0.png">
+
+<link rel="canonical" href="https://www.b3ta0.one/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分析abex'crackme#2 | 大果子のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">大果子のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>时间轴</a>
+
+  </li>
+        <li class="menu-item menu-item-shuoshuo">
+
+    <a href="/shuoshuo/" rel="section"><i class="fa fa-tags fa-fw"></i>碎碎念</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.b3ta0.one/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://s1.ax1x.com/2020/08/02/aJrF1J.jpg">
+      <meta itemprop="name" content="大果砸">
+      <meta itemprop="description" content="good good study, day day up!">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大果子のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分析abex'crackme#2
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-23 00:00:00" itemprop="dateCreated datePublished" datetime="2017-01-23T00:00:00+08:00">2017-01-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2017-05-17 21:37:12" itemprop="dateModified" datetime="2017-05-17T21:37:12+08:00">2017-05-17</time>
+              </span>
+
+          
+            <span id="/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/" class="post-meta-item leancloud_visitors" data-flag-title="分析abex'crackme#2" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>好兴奋，这次涉及了简单的加密过程。第一个涉及加密的小程序abex’crackme#2我来也~</p>
+<a id="more"></a>
+<p>运行abex’crackme#2,从运行结果可以得出几个信息：一个字符串“Nope，this serial is wrong!”，输入的Name不能少于4 chars，还有这个程序编写于1999-9-19.<br>从界面看，是个生成序列号的小程序。比abex’crackme#1长的更像普遍的Crackme，以前见过的也差不多都是注册码这类。但是不知道是根据name生成序列号，还是指定的name和序列号进行对比。<br><img src="https://ooo.0o0.ooo/2017/01/14/587a2d510e7b0.png" alt="0"></p>
+<p>不过不管是哪一种，应该都会有一个关键的比较然后跳转，所以先搜索得到的那个提示错误的字符串，去附近找找跳转的代码<br><img src="https://ooo.0o0.ooo/2017/01/14/587a35fdbb721.png" alt="1"><br>从错误信息像上面找，看了到提示正确的信息，虽然我破解的小程序不多，但是我见过的关键跳转都在正确和错误代码的上面不远处。看到距离最近的JE上面有个函数，查了一下VB函数（根据前面的msvbvm60就能知道这是一个典型的VB文件），_vbavertsteq是一个比较两个变量值是否相等的函数，在这里下一个断点之后运行程序，我输入的name是1111，serial是2222<br><img src="https://ooo.0o0.ooo/2017/01/14/587a387d56a14.png" alt="2"><br>既然_vbavertsteq是一个关键的判断函数，那么它前面两个push的寄存器就值得关注了，作为参数压栈，推测这两个值有一个是我输入的1111，另一个很有可能就是name为1111对应的正确的序列号。<br>在数据窗口跟随这两个地址，哇塞，立马就蹦出了两个字符串，刚好其中一个就是1111，那么另一个真的是正确的序列号吗？我打开abex’crackme#2输入试了试，果然就是！edx中存储的是正确序列号对应的地址。<br><img src="https://ooo.0o0.ooo/2017/01/14/587a41c31250d.png" alt="3"><br>如果只是简单的暴破的话，到这里就可以啦。因为不管输入什么name，都可以直接得出生成的正确序列号。<br>我又用2222试了试，序列号是96969696，发现这个小程序采用的是第二种，根据name生成序列号，而且生成的序列号很有规律。那么肯定在判断之前有一个对name处理生成序列号的过程，虽然我还很菜，但还是想继续分析下去，要是以我的目前水平搞不定的话，那就过几天再来<br>根据1111 → 95959595，2222 → 96969696，我觉得加密过程应该比较简单明了，推测是对每一位字符进行处理，而不是对整个字符串进行处理，所以肯定会有一个循环。<br>往上面找寻据加密过程，发现有一个循环过程，但还不确定是否为加密过程，先下个断点，继续向上，看到了熟悉的字符串，是提醒name不能小于4 chars的提示，那么在向上肯定能看到读取name中字符串的过程代码，再向上发现了眼熟的栈帧代码，那就从这里开始分析吧。在单步调试过程中看到字符串“check”，猜测这个过程是点击check按钮后的整个过程。到达这一步，发现name中字符串已经读取完成，保存在[ebp-88]中<br><img src="https://ooo.0o0.ooo/2017/01/15/587a4e6e59740.png" alt="4"><br>在保存了name之后，又读取了name字符串的长度保存在[ebp-D4]中，后来又存在ebx中。下面的截图就是加密过程了，首先从字符串特定位置取出一个字符<br><img src="https://ooo.0o0.ooo/2017/01/15/587a55af246b8.png" alt="5"><br>间接把64存入edi，用字符的ascii码加上64之后，eax返回结果<br><img src="https://ooo.0o0.ooo/2017/01/15/587a55f6d11ed.png" alt="6"><br>然后讲两个变量值连接在一起，最后循环<br><img src="https://ooo.0o0.ooo/2017/01/15/587a5647c3c32.png" alt="7"><br>总结一下整个触发check后的过程：读取name和serial中的的字符串–读取name字符串的长度–循环加密（取出一个字符-ascii码加64-把加密后字符串连接在一起-循环）–判断ax和dx中地址对应值是否相等（ax返回结果）–ax等于零则提示错误；ax等于&amp;Hffff则提示成功。</p>
+<p>完工收队，哦耶！纯弱鸡的分析，我是按照我自己的理解和自己建立的概念去分析的，过程中肯定有一些错误和侥幸，以后学习更多知识了之后再回来修正。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>大果砸
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://www.b3ta0.one/2017/01/23/%E5%88%86%E6%9E%90abex'cm2/" title="分析abex&#39;crackme#2">https://www.b3ta0.one/2017/01/23/分析abex'cm2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Crack/" rel="tag"><i class="fa fa-tag"></i> Crack</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i> 学习笔记</a>
+              <a href="/tags/Reverse/" rel="tag"><i class="fa fa-tag"></i> Reverse</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/18/%E7%A0%B4%E8%A7%A3abex'cm1/" rel="prev" title="破解abex'crackme#1">
+      <i class="fa fa-chevron-left"></i> 破解abex'crackme#1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/01/27/%E4%BB%A5notepad_uxp%E4%B8%BA%E4%BE%8B%E4%BA%86%E8%A7%A3uxp%E6%96%87%E4%BB%B6/" rel="next" title="以notepad_upx.exe为例了解UPX文件">
+      以notepad_upx.exe为例了解UPX文件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="大果砸"
+      src="https://s1.ax1x.com/2020/08/02/aJrF1J.jpg">
+  <p class="site-author-name" itemprop="name">大果砸</p>
+  <div class="site-description" itemprop="description">good good study, day day up!</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+      
+      <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+      <div class="widget-wrap">
+          <div id="myCanvasContainer" class="widget tagcloud">
+          <canvas width="220" height="250" id="resCanvas" style="width=100%">
+              <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Crack/" rel="tag">Crack</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PE/" rel="tag">PE</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Reverse/" rel="tag">Reverse</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Unpack/" rel="tag">Unpack</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/test1/" rel="tag">test1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/test2/" rel="tag">test2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8A%A0%E5%AF%86%E4%B8%8E%E8%A7%A3%E5%AF%86/" rel="tag">加密与解密</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag">学习笔记</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/" rel="tag">病毒分析</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" rel="tag">网络编程</a><span class="tag-list-count">6</span></li></ul>
+          </canvas>
+          </div>
+      </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大果砸</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">56k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">51 分钟</span>
+</div>
+  <!--<div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("08/02/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'MzgoDNlCc8loKv7VGrCIp7gx-gzGzoHsz',
+      appKey     : 'DLeJzJspHBmu7Me8RrebMDBK',
+      placeholder: "ヾﾉ≧∀≦)o来啊，快活啊!",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+
+
+  <script src="/js/activate-power-mode.min.js"></script>
+  <script>
+    POWERMODE.colorful = true;
+    POWERMODE.shake = false;
+    document.body.addEventListener('input', POWERMODE);
+  </script>
+
+</body>
+</html>
