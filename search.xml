@@ -21,6 +21,9 @@
 <hr>
 <p>小结：<br>我也看得出来这个CM已经很简单很明了了，但是我真得弄了一天。在感叹自己太弱了的同时，其实也是很有成就感的，我想我还需要很多时间去学习去沉淀，加油。</p>
 ]]></content>
+      <categories>
+        <category>reverse</category>
+      </categories>
       <tags>
         <tag>Crack</tag>
       </tags>
@@ -68,6 +71,27 @@
       </tags>
   </entry>
   <entry>
+    <title>160个CM-004-ajj1</title>
+    <url>/2017/04/22/160%E4%B8%AACM-004-ajj1/</url>
+    <content><![CDATA[<h4 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h4><p>第4个咯~</p>
+<a id="more"></a>
+<h4 id="基本信息："><a href="#基本信息：" class="headerlink" title="基本信息："></a>基本信息：</h4><p>文件名称：ajj1.exe</p>
+<h4 id="分析工具："><a href="#分析工具：" class="headerlink" title="分析工具："></a>分析工具：</h4><p>PEid，OD，DeDeDark</p>
+<h4 id="开始分析："><a href="#开始分析：" class="headerlink" title="开始分析："></a>开始分析：</h4><p>1.运行界面<br>运行起来要求填写用户名和注册码，下面是一块阴影矩形，如果鼠标停留在界面内，会出现一行提示“如果注册成功，程序会出现朱茵小姐的一副靓照”，没有确定按钮</p>
+<hr>
+<p>2.查壳<br>用PEid查壳，发现没有加壳，是Dephi程序</p>
+<hr>
+<p>3.查看事件<br>无法查找字符串了，又没有确定按钮，于是我使用DeDeDark查看了相关的事件，并且在相应的入口下了断点<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1af2a10b6c.png" alt="0"></p>
+<hr>
+<p>4.载入OD分析<br>1)每输入一个用户名的字符，就会断在KerUp的入口<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1afa063c37.png" alt="1"><br>1)每输入一个注册码的字符，就会断在chkcode的入口<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b0606138c.png" alt="2"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b06dc11da.png" alt="3"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b079da99f.png" alt="4"><br>可以看到Serial的生成规则是“黑头Sun Bird(Name长度+5)dseloffc-012-OK（Name）”<br>但是就算注册码正确了，也不会有注册成功的效果出现，因为在判断之后会根据对错给相应的内存单元赋值<br>可是为什么不会直接出现注册成功的效果呢，猜测可能是要点击触发下一个事件<br>3）单击阴影矩形，会断在Panel1Click<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b5ef685fd.png" alt="5"><br>可是从上面的分析，我们可以知道，如果注册码正确的话，[ebx+0x30C]被赋值3E，否则为0，所以不管正不正确这里都会跳转<br>4）试着双击，依次断在Panel1Click，Panel1DblClikc<br>在Panel1DblClikck中会对[ebx+0x30C]再次赋值0x85<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b768ef825.png" alt="6"><br>之后再单击到Panel1Click进行判断<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1cc5285233.png" alt="7"><br>这次会将会提示注册成功，随后会显示朱茵小姐的照片。</p>
+<hr>
+<p>哦耶！</p>
+]]></content>
+      <tags>
+        <tag>Crack</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>160个CM-006-aLoNg3x1</title>
     <url>/2017/05/06/160%E4%B8%AACM-006-aLoNg3x1/</url>
     <content><![CDATA[<h4 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h4><p>前段时间面试篮球赛各种事情忙飞了，补觉完毕后继续Crack</p>
@@ -85,27 +109,6 @@
 <p>2)每输入一个注册码的字符，就会断在chkcode的入口<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b0606138c.png" alt="2"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b06dc11da.png" alt="3"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b079da99f.png" alt="4"><br>可以看到Serial的生成规则是“黑头Sun Bird(Name长度+5)dseloffc-012-OK（Name）”<br>但是就算注册码正确了，也不会有注册成功的效果出现，因为在判断之后会根据对错给相应的内存单元赋值<br>可是为什么不会直接出现注册成功的效果呢，猜测可能是要点击触发下一个事件</p>
 <p>3）单击阴影矩形，会断在Panel1Click<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b5ef685fd.png" alt="5"><br>可是从上面的分析，我们可以知道，如果注册码正确的话，[ebx+0x30C]被赋值3E，否则为0，所以不管正不正确这里都会跳转</p>
 <p>4）试着双击，依次断在Panel1Click，Panel1DblClikc<br>在Panel1DblClikck中会对[ebx+0x30C]再次赋值0x85<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b768ef825.png" alt="6"><br>之后再单击到Panel1Click进行判断<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1cc5285233.png" alt="7"><br>这次会将会提示注册成功，随后会显示朱茵小姐的照片。</p>
-<hr>
-<p>哦耶！</p>
-]]></content>
-      <tags>
-        <tag>Crack</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>160个CM-004-ajj1</title>
-    <url>/2017/04/22/160%E4%B8%AACM-004-ajj1/</url>
-    <content><![CDATA[<h4 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h4><p>第4个咯~</p>
-<a id="more"></a>
-<h4 id="基本信息："><a href="#基本信息：" class="headerlink" title="基本信息："></a>基本信息：</h4><p>文件名称：ajj1.exe</p>
-<h4 id="分析工具："><a href="#分析工具：" class="headerlink" title="分析工具："></a>分析工具：</h4><p>PEid，OD，DeDeDark</p>
-<h4 id="开始分析："><a href="#开始分析：" class="headerlink" title="开始分析："></a>开始分析：</h4><p>1.运行界面<br>运行起来要求填写用户名和注册码，下面是一块阴影矩形，如果鼠标停留在界面内，会出现一行提示“如果注册成功，程序会出现朱茵小姐的一副靓照”，没有确定按钮</p>
-<hr>
-<p>2.查壳<br>用PEid查壳，发现没有加壳，是Dephi程序</p>
-<hr>
-<p>3.查看事件<br>无法查找字符串了，又没有确定按钮，于是我使用DeDeDark查看了相关的事件，并且在相应的入口下了断点<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1af2a10b6c.png" alt="0"></p>
-<hr>
-<p>4.载入OD分析<br>1)每输入一个用户名的字符，就会断在KerUp的入口<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1afa063c37.png" alt="1"><br>1)每输入一个注册码的字符，就会断在chkcode的入口<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b0606138c.png" alt="2"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b06dc11da.png" alt="3"><br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b079da99f.png" alt="4"><br>可以看到Serial的生成规则是“黑头Sun Bird(Name长度+5)dseloffc-012-OK（Name）”<br>但是就算注册码正确了，也不会有注册成功的效果出现，因为在判断之后会根据对错给相应的内存单元赋值<br>可是为什么不会直接出现注册成功的效果呢，猜测可能是要点击触发下一个事件<br>3）单击阴影矩形，会断在Panel1Click<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b5ef685fd.png" alt="5"><br>可是从上面的分析，我们可以知道，如果注册码正确的话，[ebx+0x30C]被赋值3E，否则为0，所以不管正不正确这里都会跳转<br>4）试着双击，依次断在Panel1Click，Panel1DblClikc<br>在Panel1DblClikck中会对[ebx+0x30C]再次赋值0x85<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1b768ef825.png" alt="6"><br>之后再单击到Panel1Click进行判断<br><img src="https://ooo.0o0.ooo/2017/04/15/58f1cc5285233.png" alt="7"><br>这次会将会提示注册成功，随后会显示朱茵小姐的照片。</p>
 <hr>
 <p>哦耶！</p>
 ]]></content>
@@ -179,69 +182,6 @@
       <tags>
         <tag>网络编程</tag>
         <tag>学习笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>test.md</title>
-    <url>/2020/08/03/test/</url>
-    <content><![CDATA[<h1 id="test1"><a href="#test1" class="headerlink" title="test1"></a>test1</h1><p>heheheh <a id="more"></a> hahaha</p>
-<h2 id="test2"><a href="#test2" class="headerlink" title="test2"></a>test2</h2><blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>世间所有的相遇，都是久别重逢</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-
-<div class="note default">
-            <p>default 提示块标签</p>
-          </div>
-
-<div class="note primary">
-            <p>primary 提示块标签</p>
-          </div>
-
-<div class="note success">
-            <p>success 提示块标签</p>
-          </div>
-
-<div class="note info">
-            <p>info 提示块标签</p>
-          </div>
-
-<div class="note warning">
-            <p>warning 提示块标签</p>
-          </div>
-
-<div class="note danger">
-            <p>danger 提示块标签</p>
-          </div>
-
-<span class="label default">默认</span> <span class="label primary">主要</span> <span class="label success">成功</span> <span class="label info">信息</span> <span class="label warning">警告</span> <span class="label danger">危险</span> 
-<span class="label success">这是成功的信息</span>
-
-<div class="tabs" id="tab"><ul class="nav-tabs"><li class="tab active"><a href="#tab-1">tab 1</a></li><li class="tab"><a href="#tab-2">tab 2</a></li><li class="tab"><a href="#tab-3">A</a></li></ul><div class="tab-content"><div class="tab-pane active" id="tab-1"><p><strong>选项卡 1</strong> </p></div><div class="tab-pane" id="tab-2"><p><strong>选项卡 2</strong></p></div><div class="tab-pane" id="tab-3"><p><strong>选项卡 3</strong> 名字为A</p></div></div></div>
-
-<a class="btn" href="url" title="[title]">
-            <i class="fa fa-icon [class]"></i>text
-          </a>
-
-<div><a class="btn" href="https://tding.top/ " title="这是小丁的个人博客首页">
-            <i class="fa fa-home fa-fw"></i>首页
-          </a></div>
-
-<div class="text-center"><div><a class="btn" href="https://tding.top/ " title="这是小丁的个人博客首页">
-            <i class="fa fa-home fa-fw"></i>首页
-          </a> <a class="btn" href="https://tding.top/movies/ " title="豆瓣电影">
-            <i class="fa fa-film fa-fw"></i>观影
-          </a> <a class="btn" href="https://tding.top/books/ " title="豆瓣读书">
-            <i class="fa fa-book fa-fw"></i>阅读
-          </a></div></div>]]></content>
-      <categories>
-        <category>test</category>
-      </categories>
-      <tags>
-        <tag>test1</tag>
-        <tag>test2</tag>
       </tags>
   </entry>
   <entry>
